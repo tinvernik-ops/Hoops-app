@@ -6,17 +6,19 @@ import { getAuth } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-aut
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
 
 export const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT.firebaseapp.com',
-  projectId: 'YOUR_PROJECT',
-  storageBucket: 'YOUR_PROJECT.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: "AIzaSyDZLL2jmnaNo19zjARxNJf8jSbzu4xtJn8",
+  authDomain: "hoops-d1cd2.firebaseapp.com",
+  projectId: "hoops-d1cd2",
+  storageBucket: "hoops-d1cd2.firebasestorage.app",
+  messagingSenderId: "735740495032",
+  appId: "1:735740495032:web:d3def81a01e2de0d36e04d",
+  measurementId: "G-DYK08RGY7H"
 };
+
 
 // Web Push (Settings > enable notifications) needs a VAPID key from
 // Firebase console -> Project settings -> Cloud Messaging -> Web configuration.
-export const VAPID_KEY = 'YOUR_VAPID_KEY';
+export const VAPID_KEY = 'BPncbP8vwlBBocOaZVdEH-ea0UWIallwRS0Uwz0ea4DLJZJtgXHZWzklMxldn-AjLyfaW-9RyqS4BkDkC4hJejo';
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
