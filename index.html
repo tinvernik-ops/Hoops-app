@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Hoops</title>
+<meta name="theme-color" content="#14171C" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><text y=%2224%22 font-size=%2224%22>🏀</text></svg>" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <div id="auth-screen" hidden></div>
+
+  <div id="app-shell" hidden>
+    <main id="view" class="view" aria-busy="false"></main>
+
+    <div id="install-banner" class="install-banner" hidden>
+      <span>🏀 <span id="install-copy">Add Hoops to your home screen</span></span>
+      <div class="install-banner-actions">
+        <button id="install-btn" class="btn btn-small btn-primary">Add</button>
+        <button id="install-dismiss" class="icon-btn" aria-label="Dismiss">✕</button>
+      </div>
+    </div>
+
+    <nav id="tabbar" class="tabbar">
+      <button class="tab" data-route="court"><span class="tab-icon">🏀</span><span class="tab-label" data-i18n="nav_court">Court</span></button>
+      <button class="tab" data-route="leagues"><span class="tab-icon">🏆</span><span class="tab-label" data-i18n="nav_leagues">Leagues</span></button>
+      <button class="tab" data-route="chat"><span class="tab-icon">💬</span><span class="tab-label" data-i18n="nav_chat">Chat</span></button>
+      <button class="tab" data-route="profile"><span class="tab-icon">👤</span><span class="tab-label" data-i18n="nav_profile">Profile</span></button>
+    </nav>
+  </div>
+
+  <div id="toast-host" class="toast-host"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

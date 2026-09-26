@@ -1,0 +1,109 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function isLeagueMember(leagueId) {
+      return isSignedIn() &&
+        request.auth.uid in get(/databases/$(database)/documents/leagues/$(leagueId)).data.memberIds;
+    }
+
+    // Private profile: full details, only the owner can read/write it.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid);
+      allow delete: if false;
+    }
+
+    // Public profile: the subset of fields other players are allowed to see.
+    // The client writes both docs together whenever a profile is saved.
+    match /publicProfiles/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(uid);
+    }
+
+    // Live, short-lived location used only to show "players near you" on the
+    // Court screen. The client treats anything older than ~20 min as stale.
+    match /courtPresence/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(uid);
+    }
+
+    match /courts/{courtId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    match /courtCheckins/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    match /courtInvites/{id} {
+      allow read: if isSignedIn() &&
+        (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.fromUid == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.toUid == request.auth.uid;
+    }
+
+    // NOTE: league docs (including joinCode) are readable by any signed-in
+    // player so that "join with a code" works entirely client-side, with no
+    // server function. This is a deliberate tradeoff -- see README "Security
+    // notes". Lock this down with a Cloud Function if you need the code to
+    // be truly private.
+    match /leagues/{leagueId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() &&
+        (resource.data.ownerId == request.auth.uid || request.auth.uid in resource.data.memberIds);
+      allow delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+
+      match /members/{uid} {
+        allow read: if isSignedIn();
+        allow write: if isOwner(uid) ||
+          get(/databases/$(database)/documents/leagues/$(leagueId)).data.ownerId == request.auth.uid;
+      }
+
+      match /messages/{msgId} {
+        allow read: if isLeagueMember(leagueId);
+        allow create: if isLeagueMember(leagueId) && request.resource.data.uid == request.auth.uid;
+      }
+
+      match /games/{gameId} {
+        allow read: if isLeagueMember(leagueId);
+        allow create: if isLeagueMember(leagueId);
+        allow update: if isSignedIn() && request.auth.uid in resource.data.involvedUids;
+      }
+    }
+
+    // Ratings are only visible to the two people involved; everyone else
+    // only ever sees the aggregated numbers stored on publicProfiles.
+    match /ratings/{id} {
+      allow read: if isSignedIn() &&
+        (resource.data.raterId == request.auth.uid || resource.data.ratedId == request.auth.uid);
+      allow create: if isSignedIn() &&
+        request.resource.data.raterId == request.auth.uid &&
+        request.resource.data.raterId != request.resource.data.ratedId;
+      allow update, delete: if false;
+    }
+
+    match /directMessages/{convoId} {
+      allow read, write: if isSignedIn() && convoId.matches('.*' + request.auth.uid + '.*');
+      match /messages/{msgId} {
+        allow read, create: if isSignedIn() && convoId.matches('.*' + request.auth.uid + '.*');
+      }
+    }
+
+    match /shootingSessions/{id} {
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    match /pushSubscriptions/{uid} {
+      allow read, write: if isOwner(uid);
+    }
+  }
+}
